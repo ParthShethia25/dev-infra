@@ -26,6 +26,7 @@ jobs:
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/ParthShethia25/dev-infra.git"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config core.hooksPath /dev/null
           git add github-actions/previews/upload-artifacts-to-firebase/extract-artifact-metadata.js
           if git diff --cached --quiet; then
             echo "No generated changes."
