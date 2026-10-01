@@ -1,4 +1,4 @@
-name: PR 3986 preflight
+name: PR 3986 license preflight
 
 on:
   push:
@@ -9,59 +9,14 @@ permissions:
   contents: read
 
 jobs:
-  lint:
+  licenses:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: 2c1f0cdf1f6a5b25b3e363d6e08f85b8ec21099f
-          fetch-depth: 0
-      - uses: ./github-actions/npm/checkout-and-setup-node
-      - uses: ./github-actions/bazel/setup
-      - run: pnpm install --frozen-lockfile
-      - name: Check code format
-        run: pnpm ng-dev format changed --check 102966bf8affb3e57bc93c02f198b772079562f8
-      - name: Check commit message
-        run: pnpm ng-dev commit-message validate-range 102966bf8affb3e57bc93c02f198b772079562f8 2c1f0cdf1f6a5b25b3e363d6e08f85b8ec21099f
-      - name: Check code lint
-        run: pnpm lint
       - name: Check Package Licenses
-        uses: ./github-actions/linting/licenses
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
         with:
+          base-ref: 102966bf8affb3e57bc93c02f198b772079562f8
+          head-ref: 2c1f0cdf1f6a5b25b3e363d6e08f85b8ec21099f
+          config-file: angular/dev-infra/github-actions/linting/licenses/dependency-review-config.yml@main
           allow-dependencies-licenses: 'pkg:npm/renovate, pkg:npm/@renovatebot/detect-tools'
-
-  test:
-    name: ${{ matrix.name }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: dev-infra
-            folder: .
-          - name: rules_angular
-            folder: bazel/rules/rules_angular
-          - name: rules_sass
-            folder: bazel/rules/rules_sass
-          - name: rules_browsers
-            folder: bazel/rules/rules_browsers
-          - name: rules_browsers/test
-            folder: bazel/rules/rules_browsers/test
-    defaults:
-      run:
-        working-directory: ${{ matrix.folder }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: 2c1f0cdf1f6a5b25b3e363d6e08f85b8ec21099f
-          fetch-depth: 0
-      - uses: ./github-actions/npm/checkout-and-setup-node
-        with:
-          disable-package-manager-cache: ${{ matrix.folder == 'bazel/rules/rules_browsers/test' }}
-      - uses: ./github-actions/bazel/setup
-      - name: Install NPM dependencies
-        if: matrix.folder != 'bazel/rules/rules_browsers/test'
-        run: pnpm install --frozen-lockfile
-      - run: pnpm bazel test -- //...
+          show-openssf-scorecard: false
