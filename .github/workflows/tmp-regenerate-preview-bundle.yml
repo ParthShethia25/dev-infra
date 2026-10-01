@@ -20,7 +20,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm bazel run //github-actions/previews/upload-artifacts-to-firebase:extract-artifact-metadata
       - name: Commit regenerated bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/ParthShethia25/dev-infra.git"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add github-actions/previews/upload-artifacts-to-firebase/extract-artifact-metadata.js
